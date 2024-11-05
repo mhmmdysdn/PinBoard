@@ -149,7 +149,7 @@
                 {% endif %}
             {% endwith %}
             
-            <form action="{{ url_for('create_post') }}" method="post">
+            <form action="{{ url_for('create_post') }}" method="post" enctype="multipart/form-data">
                 <div class="form-group">
                     <label for="title">Title</label>
                     <input type="text" id="title" name="title" class="form-control" placeholder="Enter your post title" required>
@@ -161,8 +161,12 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="image_url">Image URL</label>
-                    <input type="url" id="image_url" name="image_url" class="form-control" placeholder="Paste your image URL here" required>
+                    <label for="image_url">Image</label>
+                    <input type="file" id="image" name="image" class="form-control" accept="image/*" required onchange="previewImage(event)">
+                </div>
+
+                <div class="form-group">
+                    <img id="image-preview" src="#" alt="Image Preview" style="display: none; width: 150px; height: 150px; object-fit: cover; border-radius: 5px; margin-top: 10px;">
                 </div>
 
                 <div class="form-group">
@@ -175,14 +179,28 @@
                     </select>
                 </div>
 
-                <div class="form-group">
-                    <label for="tags">Tags</label>
-                    <input type="text" id="tags" name="tags" class="form-control" placeholder="Enter tags separated by commas">
-                </div>
-
                 <button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane"></i> Create Post</button>
             </form>
         </div>
     </div>
 </body>
 </html>
+
+<script>
+    function previewImage(event) {
+        const imagePreview = document.getElementById('image-preview');
+        const file = event.target.files[0];
+
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                imagePreview.src = e.target.result;
+                imagePreview.style.display = 'block';
+            }
+            reader.readAsDataURL(file);
+        } else {
+            imagePreview.src = '#';
+            imagePreview.style.display = 'none';
+        }
+    }
+</script>

@@ -3,9 +3,16 @@ from pymongo import MongoClient, DESCENDING
 from bson import ObjectId
 from datetime import datetime
 import bcrypt
+import os
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 app.secret_key = "secret_key"  # Kunci rahasia untuk session
+
+UPLOAD_FOLDER = 'static/uploads'
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 # Koneksi ke MongoDB
 client = MongoClient("mongodb://localhost:27017/")
@@ -64,7 +71,7 @@ def create_user(username, email, password, nickname) :
         "password": hashed_password,
         "nickname": nickname,
         "joined_at": datetime.now(),  # Simpan waktu registrasi
-        "profile_pic": None,  # Default profile picture: None (belum diunggah)
+        "profile_pic": "static/images/default.jpg",  # Default profile picture: None (belum diunggah)
         "bio": "",  # Default bio: kosong
         "followers_count": 0,  # Default followers count: 0
         "following_count": 0   # Default following count: 0
@@ -195,13 +202,21 @@ def create_post():
         return redirect(url_for("login"))
     
     if request.method == "POST":
+        image = request.files["image"]
+        if image:
+            filename = secure_filename(image.filename)
+            image_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            image.save(image_path)
+            image_url = f"{app.config['UPLOAD_FOLDER']}/{filename}"
+        else:
+            image_url = None
+        
         post = {
             "user_id": session["username"],
             "title": request.form["title"],
             "description": request.form["description"],
-            "image_url": request.form["image_url"],
+            "image_url": image_url,
             "category_id": request.form["category"],
-            "tags": request.form.getlist("tags"),
             "created_at": datetime.now().strftime("%Y-%m-%d")
         }
         posts_collection.insert_one(post)
@@ -260,7 +275,7 @@ def like_post(post_id):
         like = {
             "user_id": user_id,
             "post_id": post_id,
-            "created_at": current_time
+            "created_at": current_time 
         }
         likes_collection.insert_one(like)
         response["action"] = "liked"

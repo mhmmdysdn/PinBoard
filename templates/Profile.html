@@ -1,128 +1,153 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Your Profile</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='style.css') }}"
+    />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
     <style>
-        body {
-            background-color: #f4f4f4;
-            color: #333;
-            margin: 0;
-            padding: 0;
-            padding-top: 90px;
-        }
-        #profile-section {
-            max-width: 600px;
-            margin: auto;
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-        img {
-            border-radius: 50%;
-            width: 150px;
-            height: 150px;
-            object-fit: cover;
-        }
-        .profile-info {
-            margin: 20px 0;
-        }
-        .profile-info p {
-            margin: 5px 0;
-        }
-        .bio {
-            margin: 15px 0;
-            font-style: italic;
-        }
-        .followers-following {
-            display: flex;
-            justify-content: space-between;
-            margin: 15px 0;
-            font-weight: bold;
-        }
-        form {
-            margin-top: 20px;
-        }
-        label {
-            margin-right: 10px;
-        }
-        .button2 {
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        .button2:hover {
-            background-color: #45a049;
-        }
-        nav {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 10; /* Memastikan navbar di atas elemen lain */
-}
+      body {
+        background-color: #f4f4f4;
+        color: #333;
+        margin: 0;
+        padding: 0;
+        padding-top: 90px;
+      }
+      #profile-section {
+        max-width: 600px;
+        margin: auto;
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+      img {
+        border-radius: 50%;
+        width: 150px;
+        height: 150px;
+        object-fit: cover;
+      }
+      .profile-info {
+        margin: 20px 0;
+      }
+      .profile-info p {
+        margin: 5px 0;
+      }
+      .bio {
+        margin: 15px 0;
+        font-style: italic;
+      }
+      .followers-following {
+        display: flex;
+        justify-content: space-between;
+        margin: 15px 0;
+        font-weight: bold;
+      }
+      form {
+        margin-top: 20px;
+      }
+      label {
+        margin-right: 10px;
+      }
+      .button2 {
+        background-color: #4caf50;
+        color: white;
+        border: none;
+        padding: 10px 15px;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+      .button2:hover {
+        background-color: #45a049;
+      }
+      nav {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 10; /* Memastikan navbar di atas elemen lain */
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <nav class="bg-white shadow-md fixed w-full z-10">
-        <div class="max-w-7xl mx-auto px-4">
-            <div class="flex justify-between items-center h-16">
-                <div class="flex items-center">
-                    <a href="{{ url_for('home') }}" class="text-red-600 text-2xl font-bold">PinBoard</a>
-                </div>
-                
-                <div class="flex items-center space-x-4">
-                    <a href="{{ url_for('create_post') }}" class="p-2 hover:bg-gray-100 rounded-full">
-                        <i class="fas fa-plus text-xl"></i>
-                    </a>
-                    <button class="p-2 hover:bg-gray-100 rounded-full">
-                        <i class="fas fa-bell text-xl"></i>
-                    </button>
-                    <a href="{{ url_for('logout') }}" class="p-2 hover:bg-gray-100 rounded-full">
-                        <i class="fas fa-sign-out-alt text-xl"></i>
-                    </a>
-                </div>
-            </div>
+      <div class="max-w-7xl mx-auto px-4">
+        <div class="flex justify-between items-center h-16">
+          <div class="flex items-center">
+            <a
+              href="{{ url_for('home') }}"
+              class="text-red-600 text-2xl font-bold"
+              >PinBoard</a
+            >
+          </div>
+
+          <div class="flex items-center space-x-4">
+            <a
+              href="{{ url_for('create_post') }}"
+              class="p-2 hover:bg-gray-100 rounded-full"
+            >
+              <i class="fas fa-plus text-xl"></i>
+            </a>
+            <button class="p-2 hover:bg-gray-100 rounded-full">
+              <i class="fas fa-bell text-xl"></i>
+            </button>
+            <a
+              href="{{ url_for('logout') }}"
+              class="p-2 hover:bg-gray-100 rounded-full"
+            >
+              <i class="fas fa-sign-out-alt text-xl"></i>
+            </a>
+          </div>
         </div>
+      </div>
     </nav>
 
     <section id="profile-section">
-        <h2>Profile Details</h2>
-        
-        <div class="profile-info">
-            <p>Username: {{ user['username'] }}</p>
-            <p>Email: {{ user['email'] }}</p>
-        </div>
+      <h2>Profile Details</h2>
 
-        {% if profile and profile['profile_pic'] %}
-            <img src="data:image/png;base64,{{ profile['profile_pic']|b64encode }}" alt="Profile Picture">
-        {% else %}
-            <p>No profile picture uploaded.</p>
-        {% endif %}
-        
-        <div class="bio">
-            <h3>Bio</h3>
-            <p>{{ profile['bio'] if profile else "No bio available." }}</p>
-        </div>
-        
-        <div class="followers-following">
-            <div>Followers: {{ profile['followers_count'] if profile else 0 }}</div>
-            <div>Following: {{ profile['following_count'] if profile else 0 }}</div>
-        </div>
+      <div class="profile-info">
+        <p>Username: {{ user['username'] }}</p>
+        <p>Email: {{ user['email'] }}</p>
+      </div>
 
-        <form action="{{ url_for('profile') }}" method="post" enctype="multipart/form-data">
-            <label for="profile_pic">Upload Profile Picture:</label>
-            <input type="file" name="profile_pic" accept="image/*">
-            <button class="button2" type="submit">Save</button>
-        </form>
+      {% if profile and profile['profile_pic'] %}
+      <img src="{{ profile['profile_pic'] }}" alt="Profile Picture" />
+      {% else %}
+      <img
+        src="{{ url_for('static', filename='images/default.jpg') }}" alt="Default Profile Picture"
+      />
+      {% endif %}
+
+      <div class="bio">
+        <h3>Bio</h3>
+        <p>{{ profile['bio'] if profile else "No bio available." }}</p>
+      </div>
+
+      <div class="followers-following">
+        <div>Followers: {{ profile['followers_count'] if profile else 0 }}</div>
+        <div>Following: {{ profile['following_count'] if profile else 0 }}</div>
+      </div>
+
+      <form
+        action="{{ url_for('profile') }}"
+        method="post"
+        enctype="multipart/form-data"
+      >
+        <label for="profile_pic">Upload Profile Picture:</label>
+        <input type="file" name="profile_pic" accept="image/*" />
+        <button class="button2" type="submit">Save</button>
+      </form>
     </section>
-</body>
+  </body>
 </html>

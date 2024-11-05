@@ -11,6 +11,9 @@
         box-sizing: border-box;
       }
       body {
+        background-image: url('{{ url_for("static", filename="images/bg.jpg") }}');
+        background-size: cover;
+        background-position: center;
         background-color: #f4f4f9;
         display: flex;
         justify-content: center;

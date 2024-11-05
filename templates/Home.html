@@ -143,7 +143,7 @@
                     <div class="relative">
                         <a href="{{ url_for('profile') }}">
                             <button class="flex items-center space-x-2 p-2 hover:bg-gray-100 rounded-full">
-                                <img src="/api/placeholder/32/32" class="w-8 h-8 rounded-full" alt="Profile">
+                                <img src="{{ url_for('static', filename='images/default.jpg') }}" class="w-8 h-8 rounded-full" alt="Profile">
                                 <span class="font-medium">{{ username }}</span> 
                             </button>
                         </a>
@@ -209,6 +209,8 @@
                             </div>
                         </div>
                     </div>
+
+                    <h3 class="text-lg font-semibold">{{ post.title }}</h3>
                     
                     <div class="mt-2">
                         <p class="text-sm">{{ post.description }}</p>
