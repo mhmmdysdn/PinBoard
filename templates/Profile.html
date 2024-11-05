@@ -5,31 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Your Profile</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         body {
-            font-family: Arial, sans-serif;
             background-color: #f4f4f4;
             color: #333;
             margin: 0;
             padding: 0;
-        }
-        header {
-            background-color: #4CAF50;
-            color: white;
-            padding: 15px;
-            text-align: center;
-        }
-        nav a {
-            color: white;
-            margin: 0 15px;
-            text-decoration: none;
-        }
-        nav a:hover {
-            text-decoration: underline;
+            padding-top: 90px;
         }
         #profile-section {
             max-width: 600px;
-            margin: 20px auto;
+            margin: auto;
             background: white;
             padding: 20px;
             border-radius: 8px;
@@ -63,7 +51,7 @@
         label {
             margin-right: 10px;
         }
-        button {
+        .button2 {
             background-color: #4CAF50;
             color: white;
             border: none;
@@ -71,19 +59,40 @@
             border-radius: 5px;
             cursor: pointer;
         }
-        button:hover {
+        .button2:hover {
             background-color: #45a049;
         }
+        nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 10; /* Memastikan navbar di atas elemen lain */
+}
     </style>
 </head>
 <body>
-    <header>
-        <h1>Your Profile</h1>
-        <nav>
-            <a href="{{ url_for('home') }}">Home</a>
-            <a href="{{ url_for('logout') }}">Logout</a>
-        </nav>
-    </header>
+    <nav class="bg-white shadow-md fixed w-full z-10">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <a href="{{ url_for('home') }}" class="text-red-600 text-2xl font-bold">PinBoard</a>
+                </div>
+                
+                <div class="flex items-center space-x-4">
+                    <a href="{{ url_for('create_post') }}" class="p-2 hover:bg-gray-100 rounded-full">
+                        <i class="fas fa-plus text-xl"></i>
+                    </a>
+                    <button class="p-2 hover:bg-gray-100 rounded-full">
+                        <i class="fas fa-bell text-xl"></i>
+                    </button>
+                    <a href="{{ url_for('logout') }}" class="p-2 hover:bg-gray-100 rounded-full">
+                        <i class="fas fa-sign-out-alt text-xl"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
 
     <section id="profile-section">
         <h2>Profile Details</h2>
@@ -112,7 +121,7 @@
         <form action="{{ url_for('profile') }}" method="post" enctype="multipart/form-data">
             <label for="profile_pic">Upload Profile Picture:</label>
             <input type="file" name="profile_pic" accept="image/*">
-            <button type="submit">Upload</button>
+            <button class="button2" type="submit">Save</button>
         </form>
     </section>
 </body>
