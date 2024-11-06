@@ -8,6 +8,10 @@
     href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css"
     rel="stylesheet"
   />
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+  />
   <style>
     body {
       background-color: #f4f4f4;
@@ -51,18 +55,27 @@
       resize: vertical;
       min-height: 100px;
     }
-    .button2 {
-      background-color: #4caf50;
-      color: white;
-      border: none;
+    .button2,
+    .logout-btn {
       padding: 10px 15px;
+      border: none;
       border-radius: 5px;
       cursor: pointer;
-      margin-top: 20px;
       width: 100%;
+      color: white;
+      margin-top: 20px;
+    }
+    .button2 {
+      background-color: #4caf50;
     }
     .button2:hover {
       background-color: #45a049;
+    }
+    .logout-btn {
+      background-color: #e74c3c;
+    }
+    .logout-btn:hover {
+      background-color: #c0392b;
     }
     img {
       border-radius: 50%;
@@ -72,9 +85,43 @@
       margin: 20px auto;
       display: block;
     }
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background-color: white;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      z-index: 10;
+    }
+    .email-field {
+      border: none;
+      background-color: transparent;
+      font-style: italic;
+      color: #666;
+      cursor: not-allowed;
+    }
   </style>
+  <script>
+    function confirmLogout() {
+      if (confirm("Are you sure you want to log out?")) {
+        window.location.href = "{{ url_for('logout') }}";
+      }
+    }
+  </script>
 </head>
 <body>
+  <!-- Navbar with Back Button -->
+  <nav>
+    <div class="max-w-7xl mx-auto px-4">
+      <div class="flex justify-between items-center h-16">
+        <a href="{{ url_for('profile') }}" class="p-2 rounded-full hover:bg-gray-100" aria-label="Back to Profile">
+          <i class="fas fa-arrow-left text-2xl text-red-600"></i>
+        </a>
+      </div>
+    </div>
+  </nav>
+
   <section id="update-profile-section">
     <h2>Update Profile</h2>
 
@@ -93,7 +140,7 @@
 
       <div class="form-row">
         <label for="email">Email</label>
-        <input type="text" id="email" name="email" value="{{ user['email'] }}" readonly />
+        <input type="text" id="email" name="email" value="{{ user['email'] }}" readonly class="email-field" />
       </div>
 
       <div class="form-row">
@@ -108,6 +155,9 @@
 
       <button class="button2" type="submit">Save Changes</button>
     </form>
+
+    <!-- Logout button with confirmation -->
+    <button class="logout-btn" onclick="confirmLogout()">Logout</button>
   </section>
 </body>
 </html>
