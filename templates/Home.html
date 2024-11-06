@@ -134,13 +134,17 @@
             height: 100%;
             background: rgba(0, 0, 0, 0.5);
             z-index: 1001;
-            display: flex;
             justify-content: center;
             align-items: center;
         }
         .postDetailModal.active {
             display: flex;
         }
+        .post-detail-bg {
+            max-height: 90vh; /* Set maksimal tinggi modal */
+            overflow-y: auto; /* Aktifkan scroll jika konten lebih panjang */
+        }
+
         /* Bubble style */
 .category-bubble {
     padding: 10px 20px;
@@ -212,28 +216,6 @@
         </div>
     </div>
 
-    <!-- Modal untuk Menampilkan Detail Postingan -->
-     <!-- <div class="postDetailModal">
-        <div class="post-detail-bg">
-            <button onclick="closePostDetail()" class="text-gray-500 hover:text-gray-700 absolute top-4 right-4">
-                <i class="fas fa-times"></i>
-            </button>
-            <img id="postDetailImage" src="" alt="Post Image" class="w-full h-auto rounded-lg mb-4">
-            <h3 id="postDetailTitle" class="text-lg font-semibold mb-2"></h3>
-            <p id="postDetailDescription" class="text-sm mb-4"></p>
-            <span class="text-sm">Posted by: <span id="postDetailUsername"></span></span>
-            <div class="flex justify-between mt-4">
-                <span id="postDetailLikes" class="text-sm"></span>
-                <button id="followButton" class="bg-blue-500 text-white rounded px-4 py-2">Follow</button>
-            </div>
-            <div class="mt-4">
-                <h4 class="font-semibold">Comments:</h4>
-                <div id="postComments" class="mt-2">
-                </div>
-            </div>
-        </div>
-    </div> -->
-
     <!-- Navigation Bar -->
     <nav class="bg-white shadow-md fixed w-full z-10">
         <div class="max-w-7xl mx-auto px-4">
@@ -269,18 +251,21 @@
     <main class="pt-20">
         <div class="pin-container">
             {% for post in posts %}
-            <div class="pin-item shadow-lg" data-post-id="{{ post._id }}">
+            <div class="pin-item shadow-lg" data-post-id="{{ post._id }}" onclick="showPostDetail({
+                image_url: '{{ post.image_url }}',
+                title: '{{ post.title }}',
+                description: '{{ post.description }}',
+                user_id: '{{ post.user_id }}',
+                likes_count: '{{ post.likes_count }}'
+            })">
                 <div class="relative">
                     <img src="{{ post.image_url }}" class="w-full" alt="{{ post.title }}">
                     <div class="pin-overlay absolute inset-0 flex flex-col justify-between p-4">
                         <div class="flex justify-end space-x-2">
-                            <button onclick="toggleLike('{{ post._id }}')" 
+                            <button onclick="toggleLike('{{ post._id }}'); event.stopPropagation();" 
                                     class="like-button bg-white p-2 rounded-full hover:bg-gray-100 {{ 'text-red-500' if post.is_liked else '' }}"
                                     title="{{ 'Liked on ' + post.liked_at if post.is_liked else 'Like this post' }}">
                                 <i class="{{ 'fas' if post.is_liked else 'far' }} fa-heart"></i>
-                            </button>
-                            <button class="bg-white p-2 rounded-full hover:bg-gray-100">
-                                <i class="fas fa-bookmark"></i>
                             </button>
                         </div>
                     </div>
@@ -294,8 +279,6 @@
                                       onclick="showLikeDetails('{{ post._id }}')">
                                     {{ post.likes_count }} likes
                                 </span>
-                                
-                                <!-- Tooltip untuk recent likes -->
                                 <div class="hidden group-hover:block absolute bottom-full left-0 mb-2 w-48 bg-white rounded-lg shadow-lg p-2 text-xs">
                                     {% if post.recent_likes %}
                                         <div class="font-medium mb-1">Recent likes:</div>
@@ -318,13 +301,13 @@
                             </div>
                         </div>
                     </div>
-
+        
                     <h3 class="text-lg font-semibold">{{ post.title }}</h3>
                     
                     <div class="mt-2">
                         <p class="text-sm">{{ post.description }}</p>
                     </div>
-
+        
                     {% if post.is_liked %}
                     <div class="mt-2 text-xs text-gray-500">
                         You liked this post
@@ -334,7 +317,35 @@
             </div>
             {% endfor %}
         </div>
-    </main> 
+    </main>
+
+    <!-- Modal untuk Menampilkan Detail Postingan -->
+<div class="postDetailModal" style="display:none;">
+    <div class="post-detail-bg bg-white w-full max-w-2xl mx-auto rounded-lg shadow-lg p-6 relative max-h-[90vh] overflow-auto">
+        <!-- Tombol tutup modal -->
+        <button onclick="closePostDetail()" class="text-gray-500 hover:text-gray-700 absolute top-4 right-4 w-10 h-10 rounded-full flex items-center justify-center bg-gray-200">
+            <i class="fas fa-times"></i>
+        </button>
+        <img id="postDetailImage" src="" alt="Post Image" class="w-full h-auto rounded-lg mb-4">
+        <h3 id="postDetailTitle" class="text-lg font-semibold mb-2"></h3>
+        <p id="postDetailDescription" class="text-sm mb-4"></p>
+        <span class="text-sm">Posted by: <span id="postDetailUsername"></span></span>
+        <div class="flex justify-between mt-4">
+            <span id="postDetailLikes" class="text-sm"></span>
+            <button onclick="toggleLike(currentPostId);" class="like-button bg-white p-2 rounded-full hover:bg-gray-100">
+                <i class="far fa-heart"></i> <!-- Tombol like di modal -->
+            </button>
+        </div>
+        <div class="mt-4">
+            <h4 class="font-semibold">Comments:</h4>
+            <div id="postComments" class="mt-2">
+                <!-- Komentar akan ditambahkan di sini -->
+            </div>
+            <input type="text" id="commentInput" placeholder="Add a comment..." class="border-b border-gray-400 focus:outline-none focus:border-blue-500 w-full mt-2" />
+            <button onclick="addComment();" class="mt-2 bg-blue-500 text-white rounded px-4 py-1">Post</button>
+        </div>
+    </div>
+</div>
 
     <!-- Modal untuk menampilkan semua likes -->
     <div id="likesModal" class="modal">
@@ -356,20 +367,21 @@
         let currentCategory = null;  // Menyimpan kategori yang sedang dipilih
 
         function showPostDetail(post) {
-            // Isi modal dengan data postingan
-            document.getElementById('postDetailImage').src = post.image_url;
-            document.getElementById('postDetailTitle').innerText = post.title;
-            document.getElementById('postDetailDescription').innerText = post.description;
-            document.getElementById('postDetailUsername').innerText = post.user_id; // username
-            document.getElementById('postDetailLikes').innerText = post.likes_count + ' likes';
+    // Isi modal dengan data postingan
+    document.getElementById('postDetailImage').src = post.image_url;
+    document.getElementById('postDetailTitle').innerText = post.title;
+    document.getElementById('postDetailDescription').innerText = post.description;
+    document.getElementById('postDetailUsername').innerText = post.user_id; // username
+    document.getElementById('postDetailLikes').innerText = post.likes_count + ' likes';
 
-            // Tampilkan modal
-            document.getElementById('postDetailModal').style.display = 'block';
-        }
+    // Tampilkan modal
+    document.querySelector('.postDetailModal').style.display = 'flex';
+}
 
-        function closePostDetail() {
-            document.getElementById('postDetailModal').style.display = 'none';
-        }
+function closePostDetail() {
+    document.querySelector('.postDetailModal').style.display = 'none';
+}
+
 
 function filterByCategory(categoryId, e) {
     console.log("Category ID:", categoryId); // Debugging
