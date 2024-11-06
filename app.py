@@ -194,7 +194,10 @@ def profile():
             }
             profile_collection.replace_one({'username': session['username']}, profile_data, upsert=True)
     
-    return render_template('Profile.html', user=user, profile=profile_data)
+    # Mendapatkan postingan dari pengguna
+    user_posts = list(posts_collection.find({"user_id": session['username']}))
+
+    return render_template('Profile.html', user=user, profile=profile_data, posts=user_posts)
 
 @app.route("/create-post", methods=["GET", "POST"])
 def create_post():
