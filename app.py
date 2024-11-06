@@ -194,7 +194,10 @@ def profile():
             }
             profile_collection.replace_one({'username': session['username']}, profile_data, upsert=True)
     
-    return render_template('Profile.html', user=user, profile=profile_data)
+    # Mendapatkan postingan dari pengguna
+    user_posts = list(posts_collection.find({"user_id": session['username']}))
+
+    return render_template('Profile.html', user=user, profile=profile_data, posts=user_posts)
 
 @app.route("/create-post", methods=["GET", "POST"])
 def create_post():
@@ -225,6 +228,46 @@ def create_post():
     
     categories = list(categories_collection.find())
     return render_template("create_post.html", categories=categories)
+
+@app.route('/update_profile', methods=['GET', 'POST'])
+def update_profile():
+    if 'username' not in session:
+        return redirect(url_for('login'))
+
+    user = users_collection.find_one({'username': session['username']})
+    profile_data = profile_collection.find_one({'username': session['username']})
+
+    if request.method == 'POST':
+        username = session['username']
+        bio = request.form.get('bio', '')
+
+        # Check if a new profile picture is uploaded
+        profile_pic = request.files.get('profile_pic')
+        if profile_pic:
+            filename = secure_filename(profile_pic.filename)
+            file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            profile_pic.save(file_path)
+            profile_pic_url = f"/{file_path}"
+        else:
+            profile_pic_url = profile_data['profile_pic'] if profile_data else "static/images/default.jpg"
+
+        # Update profile in the database
+        profile_collection.update_one(
+            {'username': username},
+            {
+                '$set': {
+                    'bio': bio,
+                    'profile_pic': profile_pic_url,
+                    'updated_at': datetime.now()
+                }
+            },
+            upsert=True
+        )
+        
+        flash("Profile updated successfully!", "success")
+        return redirect(url_for('profile'))
+
+    return render_template('update_profile.html', user=user, profile=profile_data)
 
 @app.route("/search")
 def search():

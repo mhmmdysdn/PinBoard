@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Update Profile</title>
+  <link
+    href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css"
+    rel="stylesheet"
+  />
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+  />
+  <style>
+    body {
+      background-color: #f4f4f4;
+      color: #333;
+      margin: 0;
+      padding: 0;
+      padding-top: 90px;
+      font-family: Arial, sans-serif;
+    }
+    #update-profile-section {
+      max-width: 600px;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    h2 {
+      font-family: 'Verdana', sans-serif;
+      font-size: 24px;
+      text-align: center;
+    }
+    .form-row {
+      display: flex;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+    .form-row label {
+      width: 30%;
+      font-weight: bold;
+      text-align: left;
+    }
+    .form-row input,
+    .form-row textarea {
+      width: 70%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+    .button2,
+    .logout-btn {
+      padding: 10px 15px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      width: 100%;
+      color: white;
+      margin-top: 20px;
+    }
+    .button2 {
+      background-color: #4caf50;
+    }
+    .button2:hover {
+      background-color: #45a049;
+    }
+    .logout-btn {
+      background-color: #e74c3c;
+    }
+    .logout-btn:hover {
+      background-color: #c0392b;
+    }
+    img {
+      border-radius: 50%;
+      width: 150px;
+      height: 150px;
+      object-fit: cover;
+      margin: 20px auto;
+      display: block;
+    }
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background-color: white;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      z-index: 10;
+    }
+    .email-field {
+      border: none;
+      background-color: transparent;
+      font-style: italic;
+      color: #666;
+      cursor: not-allowed;
+    }
+  </style>
+  <script>
+    function confirmLogout() {
+      if (confirm("Are you sure you want to log out?")) {
+        window.location.href = "{{ url_for('logout') }}";
+      }
+    }
+  </script>
+</head>
+<body>
+  <!-- Navbar with Back Button -->
+  <nav>
+    <div class="max-w-7xl mx-auto px-4">
+      <div class="flex justify-between items-center h-16">
+        <a href="{{ url_for('profile') }}" class="p-2 rounded-full hover:bg-gray-100" aria-label="Back to Profile">
+          <i class="fas fa-arrow-left text-2xl text-red-600"></i>
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <section id="update-profile-section">
+    <h2>Update Profile</h2>
+
+    <!-- Display current profile picture if available, otherwise show default -->
+    {% if profile and profile['profile_pic'] %}
+    <img src="{{ profile['profile_pic'] }}" alt="Current Profile Picture" />
+    {% else %}
+    <img src="{{ url_for('static', filename='images/default.jpg') }}" alt="Default Profile Picture" />
+    {% endif %}
+
+    <form action="{{ url_for('update_profile') }}" method="post" enctype="multipart/form-data">
+      <div class="form-row">
+        <label for="username">Username</label>
+        <input type="text" id="username" name="username" value="{{ user['username'] }}" required />
+      </div>
+
+      <div class="form-row">
+        <label for="email">Email</label>
+        <input type="text" id="email" name="email" value="{{ user['email'] }}" readonly class="email-field" />
+      </div>
+
+      <div class="form-row">
+        <label for="bio">Bio</label>
+        <textarea id="bio" name="bio">{{ profile['bio'] if profile else '' }}</textarea>
+      </div>
+
+      <div class="form-row">
+        <label for="profile_pic">Profile Picture</label>
+        <input type="file" id="profile_pic" name="profile_pic" accept="image/*" />
+      </div>
+
+      <button class="button2" type="submit">Save Changes</button>
+    </form>
+
+    <!-- Logout button with confirmation -->
+    <button class="logout-btn" onclick="confirmLogout()">Logout</button>
+  </section>
+</body>
+</html>
