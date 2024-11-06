@@ -32,7 +32,7 @@
 
     <style>
                 #searchResults {
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); /* Membuat kolom yang fleksibel */
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
         }
 
         .result-item {
@@ -223,9 +223,6 @@
                             </button>
                         </a>
                     </div>
-                    <a href="{{ url_for('logout') }}" class="p-2 hover:bg-gray-100 rounded-full">
-                        <i class="fas fa-sign-out-alt text-xl"></i>
-                    </a>
                 </div>
             </div>
         </div>
@@ -376,4 +373,3 @@ function searchPins() {
         </script>
 </body>
 </html>
-
