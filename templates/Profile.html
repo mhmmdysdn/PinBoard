@@ -21,7 +21,6 @@
       background-color: #f4f4f4;
       color: #333;
       margin: 0;
-      padding: 0;
       padding-top: 90px;
       font-family: Arial, sans-serif;
     }
@@ -34,23 +33,29 @@
       box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
       text-align: center;
     }
-    h2 {
-      font-family: 'Verdana', sans-serif;
-      font-size: 24px;
+    .username-title {
+      font-size: 28px;
+      font-weight: bold;
+      color: black;
+      margin: 10px 0;
     }
-    img {
+    img.profile-pic {
       border-radius: 50%;
       width: 150px;
       height: 150px;
       object-fit: cover;
-      margin: 20px auto; /* Centers the profile picture */
-      display: block; /* Ensures it's treated as a block-level element */
-    }
-    .profile-info p {
-      margin: 5px 0;
+      margin: 20px auto;
+      display: block;
     }
     .bio {
       margin: 15px 0;
+    }
+    .bio-title {
+      font-weight: bold;
+      color: black;
+      margin-bottom: 5px;
+    }
+    .bio-content {
       font-style: italic;
     }
     .followers-following {
@@ -83,6 +88,25 @@
       right: 0;
       z-index: 10;
     }
+    #uploaded-photos-section {
+      margin: 20px auto;
+      padding: 20px;
+      max-width: 900px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    .uploaded-photos-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 10px;
+    }
+    .uploaded-photo-item img {
+      width: 100%;
+      height: auto;
+      object-fit: cover;
+      border-radius: 8px;
+    }
   </style>
 </head>
 <body>
@@ -92,7 +116,6 @@
         <div class="flex items-center">
           <a href="{{ url_for('home') }}" class="text-red-600 text-2xl font-bold">PinBoard</a>
         </div>
-
         <div class="flex items-center space-x-4">
           <a href="{{ url_for('create_post') }}" class="p-2 hover:bg-gray-100 rounded-full">
             <i class="fas fa-plus text-xl"></i>
@@ -109,22 +132,19 @@
   </nav>
 
   <section id="profile-section">
-    <h2>Profile Details</h2>
-
     <div class="profile-info">
-      <p>Username: {{ user['username'] }}</p>
-      <!-- Removed the email field here -->
+      <p class="username-title">{{ user['username'] }}</p>
     </div>
 
     {% if profile and profile['profile_pic'] %}
-    <img src="{{ profile['profile_pic'] }}" alt="Profile Picture" />
+    <img src="{{ profile['profile_pic'] }}" alt="Profile Picture" class="profile-pic" />
     {% else %}
-    <img src="{{ url_for('static', filename='images/default.jpg') }}" alt="Default Profile Picture" />
+    <img src="{{ url_for('static', filename='images/default.jpg') }}" alt="Default Profile Picture" class="profile-pic" />
     {% endif %}
 
     <div class="bio">
-      <h3>Bio</h3>
-      <p>{{ profile['bio'] if profile else "No bio available." }}</p>
+      <div class="bio-title">Bio</div>
+      <p class="bio-content">{{ profile['bio'] if profile else "No bio available." }}</p>
     </div>
 
     <div class="followers-following">
@@ -137,6 +157,24 @@
       <input type="file" name="profile_pic" accept="image/*" />
       <button class="button2" type="submit">Save</button>
     </form>
+  </section>
+
+  <!-- Section Terpisah untuk Foto yang Diunggah -->
+  <section id="uploaded-photos-section">
+    <h3 class="text-2xl font-semibold mb-4 text-center">Uploaded Photos</h3>
+    <div class="uploaded-photos-grid">
+      {% for post in posts %}
+      <div class="uploaded-photo-item">
+        <img src="{{ post['image_url'] }}" alt="Post Image" />
+        <div class="p-2 bg-white shadow-md rounded-b-md">
+          <h4 class="text-lg font-bold">{{ post['title'] }}</h4>
+          <p class="text-sm text-gray-600">{{ post['description'] }}</p>
+        </div>
+      </div>
+      {% else %}
+      <p class="col-span-3 text-center text-gray-500">No photos uploaded yet.</p>
+      {% endfor %}
+    </div>
   </section>
 </body>
 </html>
