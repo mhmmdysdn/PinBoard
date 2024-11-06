@@ -96,6 +96,7 @@
             height: 100%;
             background: rgba(0, 0, 0, 0.5);
             z-index: 1000;
+            padding: 70px 0;
         }
         .search-modal.active {
             display: flex;
@@ -122,6 +123,22 @@
             z-index: 1000;
         }
         .modal.active {
+            display: flex;
+        }
+        .postDetailModal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1001;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .postDetailModal.active {
             display: flex;
         }
         /* Bubble style */
@@ -195,7 +212,27 @@
         </div>
     </div>
 
-
+    <!-- Modal untuk Menampilkan Detail Postingan -->
+     <!-- <div class="postDetailModal">
+        <div class="post-detail-bg">
+            <button onclick="closePostDetail()" class="text-gray-500 hover:text-gray-700 absolute top-4 right-4">
+                <i class="fas fa-times"></i>
+            </button>
+            <img id="postDetailImage" src="" alt="Post Image" class="w-full h-auto rounded-lg mb-4">
+            <h3 id="postDetailTitle" class="text-lg font-semibold mb-2"></h3>
+            <p id="postDetailDescription" class="text-sm mb-4"></p>
+            <span class="text-sm">Posted by: <span id="postDetailUsername"></span></span>
+            <div class="flex justify-between mt-4">
+                <span id="postDetailLikes" class="text-sm"></span>
+                <button id="followButton" class="bg-blue-500 text-white rounded px-4 py-2">Follow</button>
+            </div>
+            <div class="mt-4">
+                <h4 class="font-semibold">Comments:</h4>
+                <div id="postComments" class="mt-2">
+                </div>
+            </div>
+        </div>
+    </div> -->
 
     <!-- Navigation Bar -->
     <nav class="bg-white shadow-md fixed w-full z-10">
@@ -218,8 +255,8 @@
                     <div class="relative">
                         <a href="{{ url_for('profile') }}">
                             <button class="flex items-center space-x-2 p-2 hover:bg-gray-100 rounded-full">
-                                <img src="{{ url_for('static', filename='images/default.jpg') }}" class="w-8 h-8 rounded-full" alt="Profile">
-                                <span class="font-medium">{{ username }}</span> 
+                                <img src="{{ profile_image_url }}" class="w-8 h-8 rounded-full" alt="Profile">
+                                <span class="font-medium">{{ username }}</span>
                             </button>
                         </a>
                     </div>
@@ -317,6 +354,22 @@
 
     <script>
         let currentCategory = null;  // Menyimpan kategori yang sedang dipilih
+
+        function showPostDetail(post) {
+            // Isi modal dengan data postingan
+            document.getElementById('postDetailImage').src = post.image_url;
+            document.getElementById('postDetailTitle').innerText = post.title;
+            document.getElementById('postDetailDescription').innerText = post.description;
+            document.getElementById('postDetailUsername').innerText = post.user_id; // username
+            document.getElementById('postDetailLikes').innerText = post.likes_count + ' likes';
+
+            // Tampilkan modal
+            document.getElementById('postDetailModal').style.display = 'block';
+        }
+
+        function closePostDetail() {
+            document.getElementById('postDetailModal').style.display = 'none';
+        }
 
 function filterByCategory(categoryId, e) {
     console.log("Category ID:", categoryId); // Debugging

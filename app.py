@@ -109,6 +109,13 @@ def home():
     
     posts = list(posts_collection.find().sort("created_at", DESCENDING).skip(skip).limit(per_page))
     categories = list(categories_collection.find())
+
+    # Ambil data pengguna untuk menampilkan foto profil
+    user = users_collection.find_one({"username": session["username"]})
+    profile_data = profile_collection.find_one({"username": session["username"]})
+    
+    # Jika data profil ada, gunakan foto profil yang ada, jika tidak gunakan default
+    profile_image_url = profile_data['profile_pic'] if profile_data else user.get('profile_pic', 'static/images/default.jpg')
     
     # Tambahkan informasi likes untuk setiap post
     for post in posts:
@@ -128,13 +135,16 @@ def home():
                                "liked_at": like["created_at"].strftime("%Y-%m-%d %H:%M:%S")} 
                               for like in post_likes[:3]]
         
-        # Ambil comments
-        post["comments"] = list(comments_collection.find({"post_id": post["_id"]}).limit(3))
+        # Ambil comments, urutkan berdasarkan waktu terbaru
+        post["comments"] = list(comments_collection.find({"post_id": post["_id"]}).sort("created_at", DESCENDING).limit(3))
     
     return render_template("home.html", 
                          username=session["username"],
                          posts=posts,
-                         categories=categories)
+                         categories=categories,
+                         profile_image_url=profile_image_url)
+
+
 
 @app.route("/post/<post_id>/likes")
 def post_likes(post_id):
@@ -220,7 +230,7 @@ def create_post():
             "description": request.form["description"],
             "image_url": image_url,
             "category_id": request.form["category"],
-            "created_at": datetime.now().strftime("%Y-%m-%d")
+            "created_at": datetime.now()  # Simpan sebagai objek datetime
         }
         posts_collection.insert_one(post)
         flash("Post created successfully!", "success")
@@ -228,6 +238,7 @@ def create_post():
     
     categories = list(categories_collection.find())
     return render_template("create_post.html", categories=categories)
+
 
 @app.route('/update_profile', methods=['GET', 'POST'])
 def update_profile():
