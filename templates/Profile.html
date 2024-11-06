@@ -81,6 +81,18 @@
     .button2:hover {
       background-color: #45a049;
     }
+    .edit-profile-btn {
+      background-color: #007bff;
+      color: white;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    .edit-profile-btn:hover {
+      background-color: #0056b3;
+    }
     nav {
       position: fixed;
       top: 0;
@@ -133,7 +145,11 @@
 
   <section id="profile-section">
     <div class="profile-info">
+<<<<<<< HEAD
       <p class="username-title">{{ user['username'] }}</p>
+=======
+      <p>Username: {{ user['username'] }}</p>
+>>>>>>> b6d82f9289822484a5175ae02ad2de8adbd1c0f1
     </div>
 
     {% if profile and profile['profile_pic'] %}
@@ -152,11 +168,9 @@
       <div>Following: {{ profile['following_count'] if profile else 0 }}</div>
     </div>
 
-    <form action="{{ url_for('profile') }}" method="post" enctype="multipart/form-data">
-      <label for="profile_pic">Upload Profile Picture:</label>
-      <input type="file" name="profile_pic" accept="image/*" />
-      <button class="button2" type="submit">Save</button>
-    </form>
+    <!-- Add "Edit Profile" button to go to the Update Profile page -->
+    <a href="{{ url_for('update_profile') }}" class="edit-profile-btn">Edit Profile</a>
+
   </section>
 
   <!-- Section Terpisah untuk Foto yang Diunggah -->
