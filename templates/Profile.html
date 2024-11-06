@@ -57,9 +57,9 @@
     .bio-content {
       font-style: italic;
     }
-    .followers-following {
+    .profile-likes {
       display: flex;
-      justify-content: space-between;
+      justify-content: center;
       margin: 15px 0;
       font-weight: bold;
     }
@@ -139,48 +139,53 @@
     </div>
   </nav>
 
-  <section id="profile-section">
-    <div class="profile-info">
-      <p class="username-title">{{ user['username'] }}</p>
-    </div>
+  <!-- Profil Section -->
+<section id="profile-section">
+  <div class="profile-info">
+    <p class="username-title">{{ user['username'] }}</p>
+  </div>
 
-    {% if profile and profile['profile_pic'] %}
-    <img src="{{ profile['profile_pic'] }}" alt="Profile Picture" class="profile-pic" />
-    {% else %}
-    <img src="{{ url_for('static', filename='images/default.jpg') }}" alt="Default Profile Picture" class="profile-pic" />
-    {% endif %}
+  <!-- Profile Picture -->
+  {% if profile and profile['profile_pic'] %}
+  <img src="data:image/jpeg;base64,{{ profile['profile_pic'] }}" alt="Profile Picture" class="profile-pic" />
+  {% else %}
+  <img src="{{ url_for('static', filename='images/default.jpg') }}" alt="Default Profile Picture" class="profile-pic" />
+  {% endif %}
 
-    <div class="bio">
-      <div class="bio-title">Bio</div>
-      <p class="bio-content">{{ profile['bio'] if profile else "No bio available." }}</p>
-    </div>
+  <!-- Bio Section -->
+  <div class="bio">
+    <div class="bio-title">Bio</div>
+    <p class="bio-content">{{ profile['bio'] if profile else "No bio available." }}</p>
+  </div>
 
-    <div class="followers-following">
-      <div>Followers: {{ profile['followers_count'] if profile else 0 }}</div>
-      <div>Following: {{ profile['following_count'] if profile else 0 }}</div>
-    </div>
+  <div class="profile-likes">
+    <p>Total Likes: {{ likes_count }}</p>
+  </div>  
 
-    <!-- Add "Edit Profile" button to go to the Update Profile page -->
-    <a href="{{ url_for('update_profile') }}" class="edit-profile-btn">Edit Profile</a>
+  <!-- Edit Profile Button -->
+  <a href="{{ url_for('update_profile') }}" class="edit-profile-btn">Edit Profile</a>
+</section>
 
-  </section>
-
-  <!-- Section Terpisah untuk Foto yang Diunggah -->
-  <section id="uploaded-photos-section">
-    <h3 class="text-2xl font-semibold mb-4 text-center">Uploaded Photos</h3>
-    <div class="uploaded-photos-grid">
-      {% for post in posts %}
-      <div class="uploaded-photo-item">
-        <img src="{{ post['image_url'] }}" alt="Post Image" />
-        <div class="p-2 bg-white shadow-md rounded-b-md">
-          <h4 class="text-lg font-bold">{{ post['title'] }}</h4>
-          <p class="text-sm text-gray-600">{{ post['description'] }}</p>
-        </div>
+<!-- Section for Uploaded Photos -->
+<section id="uploaded-photos-section">
+  <h3 class="text-2xl font-semibold mb-4 text-center">Uploaded Photos</h3>
+  <div class="uploaded-photos-grid">
+    {% for post in posts %}
+    <div class="uploaded-photo-item">
+      <img src="{{ post['image_url'] }}" alt="Post Image" />
+      <div class="p-2 bg-white shadow-md rounded-b-md">
+        <h4 class="text-lg font-bold">{{ post['title'] }}</h4>
+        <p class="text-sm text-gray-600">{{ post['description'] }}</p>
+        <a href="/edit_post/{{ post._id }}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+          Edit
+        </a>
       </div>
-      {% else %}
-      <p class="col-span-3 text-center text-gray-500">No photos uploaded yet.</p>
-      {% endfor %}
     </div>
-  </section>
+    {% else %}
+    <p class="col-span-3 text-center text-gray-500">No photos uploaded yet.</p>
+    {% endfor %}
+  </div>
+</section>
+
 </body>
 </html>

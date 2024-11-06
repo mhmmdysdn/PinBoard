@@ -59,6 +59,35 @@ def initialize_database():
         categories_collection.insert_many(categories)  # Menyisipkan semua kategori
         print("Database initialized with categories.")
 
+    # Inisialisasi data pengguna
+    if users_collection.count_documents({}) == 0:
+        users = [
+            {"username" : "tes", "email" : "tes@gmail.com", "password" : "123" },
+            {"username" : "tes1", "email" : "tes1@gmail.com", "password" : "123" },
+            {"username" : "tes2", "email" : "tes2@gmail.com", "password" : "123" }
+        ]
+        users_collection.insert_many(users)
+        print("Many user created.")
+
+    # Inisialisasi data postingan
+    if posts_collection.count_documents({}) == 0:
+        posts = [
+            {"user_id": "tes", "title": "Beautiful Nature", "description": "Nature is beautiful", "image_url": "static/uploads/1.jpg", "category_id": "Nature", "created_at": datetime.now()},
+            {"user_id": "tes", "title": "Fashionable", "description": "Lifestyle is good", "image_url": "static/uploads/2.jpg", "category_id": "Fashion", "created_at": datetime.now()},
+            {"user_id": "tes", "title": "Art", "description": "Art is beautiful", "image_url": "static/uploads/3.jpg", "category_id": "Art", "created_at": datetime.now()},
+            {"user_id": "tes1", "title": "Nature", "description": "Sea is beatiful", "image_url": "static/uploads/4.jpg", "category_id": "Nature", "created_at": datetime.now()},
+            {"user_id": "tes1", "title": "Art", "description": "Art is good", "image_url": "static/uploads/5.jpg", "category_id": "Art", "created_at": datetime.now()},
+            {"user_id": "tes1", "title": "Nature", "description": "Nature is good", "image_url": "static/uploads/6.jpg", "category_id": "Nature", "created_at": datetime.now()},
+            {"user_id": "tes2", "title": "Nature", "description": "Nature is beautiful", "image_url": "static/uploads/7.jpg", "category_id": "Nature", "created_at": datetime.now()},
+            {"user_id": "tes2", "title": "Art", "description": "Art is beautiful", "image_url": "static/uploads/8.png", "category_id": "Art", "created_at": datetime.now()},
+            {"user_id": "tes2", "title": "Nature", "description": "Nature is good", "image_url": "static/uploads/9.png", "category_id": "Nature", "created_at": datetime.now()},
+            {"user_id": "tes", "title": "Beautiful Nature", "description": "Nature is beautiful", "image_url": "static/uploads/10.jpg", "category_id": "Nature", "created_at": datetime.now()},
+            {"user_id": "tes1", "title": "Nature", "description": "Sea is beatiful", "image_url": "static/uploads/11.jpg", "category_id": "Nature", "created_at": datetime.now()},
+            {"user_id": "tes2", "title": "Nature", "description": "Nature is good", "image_url": "static/uploads/12.jpg", "category_id": "Nature", "created_at": datetime.now()}
+        ]
+        posts_collection.insert_many(posts)  # Menyisipkan semua postingan
+        print("Database initialized with posts.")
+
 # Panggil fungsi inisialisasi
 initialize_database()
 
@@ -73,10 +102,17 @@ def create_user(username, email, password, nickname) :
         "joined_at": datetime.now(),  # Simpan waktu registrasi
         "profile_pic": "static/images/default.jpg",  # Default profile picture: None (belum diunggah)
         "bio": "",  # Default bio: kosong
-        "followers_count": 0,  # Default followers count: 0
-        "following_count": 0   # Default following count: 0
+        "likes_count": 0   # Default following count: 0
     }
     users_collection.insert_one(user)
+
+def get_likes_count(user_id):
+    # hitung jumlah likes dari semua post user
+    likes_count = db.posts.aggregate([
+        {"$match": {"user_id": user_id}},
+        {"$group": {"_id": None, "total_likes": {"$sum": "$likes_count"}}}
+    ])
+    return likes_count
 
 # Fungsi untuk memverifikasi pengguna
 def verify_user(username, password):
@@ -193,6 +229,9 @@ def profile():
     user = users_collection.find_one({'username': session['username']})
     profile_data = profile_collection.find_one({'username': session['username']})
     
+    # Ambil nilai likes_count dari pengguna
+    likes_count = user.get("likes_count", 0)
+    
     if request.method == 'POST':
         # Mengunggah foto profil
         profile_pic = request.files['profile_pic']
@@ -200,14 +239,45 @@ def profile():
             profile_data = {
                 'username': session['username'],
                 'bio': request.form['bio'],
-                'profile_pic': profile_pic.read()  # Menyimpan foto profil sebagai binary data
+                'profile_pic': profile_pic.read()
             }
             profile_collection.replace_one({'username': session['username']}, profile_data, upsert=True)
     
-    # Mendapatkan postingan dari pengguna
-    user_posts = list(posts_collection.find({"user_id": session['username']}))
+    # Ambil postingan pengguna, diurutkan berdasarkan `created_at` secara menurun
+    user_posts = list(posts_collection.find({"user_id": session['username']}).sort("created_at", DESCENDING))
 
-    return render_template('Profile.html', user=user, profile=profile_data, posts=user_posts)
+    return render_template('profile.html', user=user, profile=profile_data, posts=user_posts, likes_count=likes_count)
+
+
+@app.route('/edit_post/<post_id>', methods=['GET', 'POST'])
+def edit_post(post_id):
+    if 'username' not in session:
+        return redirect(url_for('login'))
+
+    # Mencari post berdasarkan post_id
+    post = posts_collection.find_one({'_id': ObjectId(post_id)})
+
+    # Hitung jumlah like untuk postingan ini
+    likes_count = likes_collection.count_documents({'post_id': post_id})
+
+    if request.method == 'POST':
+        title = request.form['title']
+        description = request.form['description']
+
+        # Update judul dan deskripsi postingan di database
+        posts_collection.update_one(
+            {'_id': ObjectId(post_id)},
+            {'$set': {
+                'title': title,
+                'description': description
+            }}
+        )
+
+        flash('Post updated successfully!', 'success')
+        return redirect(url_for('profile'))
+
+    return render_template('edit_post.html', post=post, likes_count=likes_count)
+
 
 @app.route("/create-post", methods=["GET", "POST"])
 def create_post():
@@ -310,12 +380,14 @@ def like_post(post_id):
     user_id = session["username"]
     current_time = datetime.now()
     
-    # Cek apakah post exists
+    # Cek apakah postingan ada
     post = posts_collection.find_one({"_id": ObjectId(post_id)})
     if not post:
         return jsonify({"error": "Post not found"}), 404
 
-    # Cek apakah user sudah like post ini
+    post_owner_id = post["user_id"]  # ID pemilik postingan
+    
+    # Cek apakah pengguna sudah memberikan like pada postingan ini
     existing_like = likes_collection.find_one({
         "user_id": user_id,
         "post_id": post_id
@@ -324,21 +396,33 @@ def like_post(post_id):
     response = {}
     
     if existing_like:
-        # Unlike: Hapus like jika sudah ada
+        # Jika sudah "like" sebelumnya, maka "unlike"
         likes_collection.delete_one({"_id": existing_like["_id"]})
+        
+        # Pastikan `likes_count` tidak menjadi negatif
+        users_collection.update_one(
+            {"username": post_owner_id, "likes_count": {"$gt": 0}},
+            {"$inc": {"likes_count": -1}}
+        )
         response["action"] = "unliked"
-        response["likes_count"] = likes_collection.count_documents({"post_id": post_id})
     else:
-        # Like: Tambah like baru dengan timestamp
+        # Jika belum "like", maka tambahkan "like" baru
         like = {
             "user_id": user_id,
             "post_id": post_id,
             "created_at": current_time 
         }
         likes_collection.insert_one(like)
+        
+        # Tambahkan `likes_count` hanya jika pengguna "like"
+        users_collection.update_one(
+            {"username": post_owner_id},
+            {"$inc": {"likes_count": 1}}
+        )
         response["action"] = "liked"
-        response["likes_count"] = likes_collection.count_documents({"post_id": post_id})
-        response["liked_at"] = current_time.strftime("%Y-%m-%d %H:%M:%S")
+    
+    # Hitung jumlah total likes untuk postingan ini
+    response["likes_count"] = likes_collection.count_documents({"post_id": post_id})
     
     return jsonify(response)
 

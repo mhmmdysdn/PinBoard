@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Post</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="bg-white shadow-md fixed w-full z-10">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <a href="{{ url_for('home') }}" class="text-red-600 text-2xl font-bold">PinBoard</a>
+                    <a href="{{ url_for('profile') }}" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
+                        Back
+                    </a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="{{ url_for('create_post') }}" class="p-2 hover:bg-gray-100 rounded-full">
+                        <i class="fas fa-plus text-xl"></i>
+                    </a>
+                    <button class="p-2 hover:bg-gray-100 rounded-full">
+                        <i class="fas fa-bell text-xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-2xl mx-auto my-10 bg-white p-6 rounded-md shadow-md">
+        <div class="flex justify-between items-center mb-4">
+            <h1 class="text-2xl font-bold">Edit Post</h1>
+        </div>
+        <form method="POST">
+            <div class="mb-4">
+                <label for="title" class="block font-medium mb-2">Title</label>
+                <input type="text" id="title" name="title" class="border rounded-md px-3 py-2 w-full" value="{{ post['title'] }}">
+            </div>
+            <div class="mb-4">
+                <label for="description" class="block font-medium mb-2">Description</label>
+                <textarea id="description" name="description" class="border rounded-md px-3 py-2 w-full" rows="3">{{ post['description'] }}</textarea>
+            </div>
+            <div class="mb-4">
+                <label for="image" class="block font-medium mb-2">Image</label>
+                {% if post['image_url'] %}
+                <!-- Menampilkan gambar yang sudah ada -->
+                <img src="{{ url_for('static', filename='uploads/' + post['image_url']) }}" alt="Post Image" class="max-w-full h-auto mb-2">
+                <p class="text-gray-600">Current image (cannot be changed):</p>
+                {% else %}
+                <p class="text-gray-600">No image available.</p>
+                {% endif %}
+            </div>
+            
+            <div class="mb-4">
+                <label for="likes_count" class="block font-medium mb-2">Likes</label>
+                <p>Likes count: {{ likes_count }}</p>
+            </div>
+            <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                Update Post
+            </button>
+        </form>
+    </div>
+</body>
+</html>
