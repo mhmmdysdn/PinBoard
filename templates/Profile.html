@@ -143,12 +143,6 @@
       <div>Following: {{ profile['following_count'] if profile else 0 }}</div>
     </div>
 
-    <form action="{{ url_for('profile') }}" method="post" enctype="multipart/form-data">
-      <label for="profile_pic">Upload Profile Picture:</label>
-      <input type="file" name="profile_pic" accept="image/*" />
-      <button class="button2" type="submit">Save</button>
-    </form>
-
     <!-- Add "Edit Profile" button to go to the Update Profile page -->
     <a href="{{ url_for('update_profile') }}" class="edit-profile-btn">Edit Profile</a>
 
