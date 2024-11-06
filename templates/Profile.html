@@ -76,6 +76,18 @@
     .button2:hover {
       background-color: #45a049;
     }
+    .edit-profile-btn {
+      background-color: #007bff;
+      color: white;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    .edit-profile-btn:hover {
+      background-color: #0056b3;
+    }
     nav {
       position: fixed;
       top: 0;
@@ -113,7 +125,6 @@
 
     <div class="profile-info">
       <p>Username: {{ user['username'] }}</p>
-      <!-- Removed the email field here -->
     </div>
 
     {% if profile and profile['profile_pic'] %}
@@ -137,6 +148,10 @@
       <input type="file" name="profile_pic" accept="image/*" />
       <button class="button2" type="submit">Save</button>
     </form>
+
+    <!-- Add "Edit Profile" button to go to the Update Profile page -->
+    <a href="{{ url_for('update_profile') }}" class="edit-profile-btn">Edit Profile</a>
+
   </section>
 </body>
 </html>
