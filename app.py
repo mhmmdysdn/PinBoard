@@ -228,20 +228,24 @@ def create_post():
 
 @app.route("/search")
 def search():
-    query = request.args.get("q", "")
+    query = request.args.get("query", "")
     category = request.args.get("category", "")
     
     search_filters = {}
-    if query:
+    if category:
+        search_filters["category_id"] = category
+    elif query:
         search_filters["$or"] = [
             {"title": {"$regex": query, "$options": "i"}},
             {"description": {"$regex": query, "$options": "i"}},
             {"tags": {"$regex": query, "$options": "i"}}
         ]
-    if category:
-        search_filters["category_id"] = category
-        
+
     posts = list(posts_collection.find(search_filters).sort("created_at", DESCENDING))
+
+    for post in posts:
+        post["_id"] = str(post["_id"])
+
     return jsonify({"posts": posts})
 
 @app.route("/like/<post_id>", methods=["POST"])
@@ -316,6 +320,8 @@ def login():
             flash("Invalid username or password!", "error")
             return redirect(url_for("login"))
     return render_template("login.html")
+
+
 
 # Route Logout
 @app.route("/logout")
