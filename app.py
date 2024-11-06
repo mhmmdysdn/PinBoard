@@ -62,9 +62,9 @@ def initialize_database():
     # Inisialisasi data pengguna
     if users_collection.count_documents({}) == 0:
         users = [
-            {"username" : "tes", "email" : "tes@gmail.com", "password" : "123" },
-            {"username" : "tes1", "email" : "tes1@gmail.com", "password" : "123" },
-            {"username" : "tes2", "email" : "tes2@gmail.com", "password" : "123" }
+            {"username": "tes", "email": "tes@gmail.com", "password": bcrypt.hashpw("123".encode('utf-8'), bcrypt.gensalt()), "nickname": "Tes", "joined_at": datetime.now(), "profile_pic": "static/images/default.jpg", "bio": "", "likes_count": 0},
+            {"username": "tes1", "email": "tes1@gmail.com", "password": bcrypt.hashpw("123".encode('utf-8'), bcrypt.gensalt()), "nickname": "Tes1", "joined_at": datetime.now(), "profile_pic": "static/images/default.jpg", "bio": "", "likes_count": 0},
+            {"username": "tes2", "email": "tes2@gmail.com", "password": bcrypt.hashpw("123".encode('utf-8'), bcrypt.gensalt()), "nickname": "Tes2", "joined_at": datetime.now(), "profile_pic": "static/images/default.jpg", "bio": "", "likes_count": 0}
         ]
         users_collection.insert_many(users)
         print("Many user created.")
@@ -105,6 +105,19 @@ def create_user(username, email, password, nickname) :
         "likes_count": 0   # Default following count: 0
     }
     users_collection.insert_one(user)
+    
+@app.route("/delete_account", methods=["POST"])
+def delete_account():
+    if "username" not in session:
+        return redirect(url_for("login"))
+    
+    # Menghapus akun dari koleksi pengguna
+    users_collection.delete_one({"username": session["username"]})
+    session.pop("username", None)  # Menghapus session
+
+    flash("Account deleted successfully!", "success")
+    return redirect(url_for("login"))
+
 
 def get_likes_count(user_id):
     # hitung jumlah likes dari semua post user
@@ -308,6 +321,21 @@ def create_post():
     
     categories = list(categories_collection.find())
     return render_template("create_post.html", categories=categories)
+
+@app.route('/delete_post/<post_id>', methods=['POST'])
+def delete_post(post_id):
+    if 'username' not in session:
+        return redirect(url_for('login'))
+
+    # Hapus postingan dari koleksi posts
+    result = posts_collection.delete_one({'_id': ObjectId(post_id)})
+
+    if result.deleted_count == 1:
+        flash('Post deleted successfully!', 'success')
+    else:
+        flash('Error deleting post.', 'error')
+
+    return redirect(url_for('profile'))  # Redirect ke halaman profil atau halaman lain yang sesuai
 
 
 @app.route('/update_profile', methods=['GET', 'POST'])

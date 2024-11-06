@@ -242,10 +242,28 @@
                             </button>
                         </a>
                     </div>
+                    <button onclick="openSettings()" class="p-2 hover:bg-gray-100 rounded-full">
+                        <i class="fas fa-cog text-xl"></i>
+                    </button>
                 </div>
             </div>
         </div>
     </nav>
+
+    <!-- Settings Modal -->
+<div id="settingsModal" class="modal hidden">
+    <div class="bg-white rounded-lg p-4 max-w-md w-full m-auto absolute right-0 mt-16 shadow-lg">
+        <h3 class="text-lg font-medium mb-4 text-center">Settings</h3>
+        <button onclick="logout()" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mb-2 w-full text-center">
+            Logout
+        </button>
+        <button onclick="closeSettings()" class="text-gray-500 hover:text-gray-700 mt-4 w-full text-center">
+            <i class="fas fa-times"></i> Close
+        </button>
+    </div>
+</div>
+
+
 
     <!-- Main Content -->
     <main class="pt-20">
@@ -434,6 +452,43 @@ function searchPins() {
             document.getElementById('searchResults').innerHTML = 'Error loading results';
         });
 }
+
+function openSettings() {
+    document.getElementById('settingsModal').style.display = 'flex';
+}
+
+function closeSettings() {
+    document.getElementById('settingsModal').style.display = 'none';
+}
+
+function logout() {
+    window.location.href = "{{ url_for('logout') }}";  // Mengarahkan ke route logout
+}
+
+function deleteAccount() {
+    if (confirm('Are you sure you want to delete your account?')) {
+        // Buat permintaan untuk menghapus akun
+        fetch('/delete_account', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                // Data yang diperlukan untuk menghapus akun
+            })
+        })
+        .then(response => {
+            if (response.ok) {
+                alert('Account deleted successfully');
+                window.location.href = "{{ url_for('logout') }}";  // Logout setelah hapus akun
+            } else {
+                alert('Error deleting account');
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+}
+
 
         </script>
 </body>
