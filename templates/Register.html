@@ -74,14 +74,41 @@
       a:hover {
         text-decoration: underline;
       }
+      .flash-message {
+        margin-bottom: 15px;
+        padding: 10px;
+        border-radius: 5px;
+        font-weight: bold;
+      }
+      .flash-success {
+        background-color: #4caf50;
+        color: white;
+      }
+      .flash-error {
+        background-color: #f44336;
+        color: white;
+      }
     </style>
   </head>
   <body>
     <div class="register-container">
       <h1>Create Account</h1>
+
+      <!-- Flash messages -->
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <div class="mb-4">
+            {% for category, message in messages %}
+              <div class="flash-message {% if category == 'error' %}flash-error{% else %}flash-success{% endif %}">
+                {{ message }}
+              </div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      {% endwith %}
+
       <form action="{{ url_for('register') }}" method="POST">
         <input type="text" name="username" placeholder="Username" required />
-        <input type="hidden" name="nickname" value="{{ username }}" />
         <input type="email" name="email" placeholder="Email" required />
         <input
           type="password"

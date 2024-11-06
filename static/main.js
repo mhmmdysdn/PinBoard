@@ -131,14 +131,3 @@ async function filterByCategory(categoryId) {
         alert('Error filtering posts. Please try again.');
     }
 }
-
-// Event listener saat dokumen dimuat
-document.addEventListener('DOMContentLoaded', function() {
-    // Tambahkan event listener untuk notifikasi
-    const notifications = document.querySelectorAll('.notification');
-    notifications.forEach(notification => {
-        setTimeout(() => {
-            notification.style.display = 'none';
-        }, 3000);
-    });
-});

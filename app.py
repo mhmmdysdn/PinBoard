@@ -24,8 +24,6 @@ posts_collection = db["posts"]
 categories_collection = db["categories"]
 login_logs_collection = db["login_logs"]
 likes_collection = db["likes"]
-comments_collection = db["comments"]
-follows_collection = db["follows"]
 profile_collection = db["profile"]
 
 # Fungsi untuk inisialisasi database
@@ -102,7 +100,7 @@ def create_user(username, email, password, nickname) :
         "joined_at": datetime.now(),  # Simpan waktu registrasi
         "profile_pic": "static/images/default.jpg",  # Default profile picture: None (belum diunggah)
         "bio": "",  # Default bio: kosong
-        "likes_count": 0   # Default following count: 0
+        "likes_count": 0   # Default likes count: 0
     }
     users_collection.insert_one(user)
     
@@ -110,6 +108,9 @@ def create_user(username, email, password, nickname) :
 def delete_account():
     if "username" not in session:
         return redirect(url_for("login"))
+    
+    # Menhapus akun dari koleksi profile
+    profile_collection.delete_one({"username": session["username"]})
     
     # Menghapus akun dari koleksi pengguna
     users_collection.delete_one({"username": session["username"]})
@@ -183,9 +184,6 @@ def home():
         post["recent_likes"] = [{"user_id": like["user_id"], 
                                "liked_at": like["created_at"].strftime("%Y-%m-%d %H:%M:%S")} 
                               for like in post_likes[:3]]
-        
-        # Ambil comments, urutkan berdasarkan waktu terbaru
-        post["comments"] = list(comments_collection.find({"post_id": post["_id"]}).sort("created_at", DESCENDING).limit(3))
     
     return render_template("home.html", 
                          username=session["username"],
@@ -224,9 +222,9 @@ def register():
         nickname = username
         
         # Set waktu pendaftaran
-        created_at = datetime.now()
+        # created_at = datetime.now()
 
-        # Fungsi create_user diubah agar menerima nickname dan created_at
+        # Fungsi create_user diubah agar menerima nickname
         create_user(username, email, password, nickname)
         
         flash("Registration successful! Please login.", "success")
@@ -327,15 +325,34 @@ def delete_post(post_id):
     if 'username' not in session:
         return redirect(url_for('login'))
 
+    # Cari postingan berdasarkan `post_id`
+    post = posts_collection.find_one({'_id': ObjectId(post_id)})
+    if not post:
+        flash('Post not found.', 'error')
+        return redirect(url_for('profile'))
+
+    # Ambil ID pemilik postingan dan jumlah like pada postingan ini
+    post_owner_id = post['user_id']
+    likes_count_on_post = likes_collection.count_documents({'post_id': post_id})
+
     # Hapus postingan dari koleksi posts
     result = posts_collection.delete_one({'_id': ObjectId(post_id)})
+    
+    # Hapus semua likes terkait postingan ini dari koleksi likes
+    likes_collection.delete_many({'post_id': post_id})
 
     if result.deleted_count == 1:
+        # Kurangi `likes_count` dari pemilik postingan berdasarkan jumlah like yang dihapus
+        users_collection.update_one(
+            {'username': post_owner_id, 'likes_count': {'$gte': likes_count_on_post}},
+            {'$inc': {'likes_count': -likes_count_on_post}}
+        )
         flash('Post deleted successfully!', 'success')
     else:
         flash('Error deleting post.', 'error')
 
     return redirect(url_for('profile'))  # Redirect ke halaman profil atau halaman lain yang sesuai
+
 
 
 @app.route('/update_profile', methods=['GET', 'POST'])
@@ -389,8 +406,7 @@ def search():
     elif query:
         search_filters["$or"] = [
             {"title": {"$regex": query, "$options": "i"}},
-            {"description": {"$regex": query, "$options": "i"}},
-            {"tags": {"$regex": query, "$options": "i"}}
+            {"description": {"$regex": query, "$options": "i"}}
         ]
 
     posts = list(posts_collection.find(search_filters).sort("created_at", DESCENDING))
@@ -454,21 +470,6 @@ def like_post(post_id):
     
     return jsonify(response)
 
-@app.route("/comment/<post_id>", methods=["POST"])
-def add_comment(post_id):
-    if "username" not in session:
-        return jsonify({"error": "Please login first"}), 401
-    
-    comment = {
-        "user_id": session["username"],
-        "post_id": post_id,
-        "content": request.json["content"],
-        "created_at": datetime.now()
-    }
-    
-    comments_collection.insert_one(comment)
-    return jsonify({"success": True})
-
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
@@ -487,7 +488,32 @@ def login():
             return redirect(url_for("login"))
     return render_template("login.html")
 
+@app.route("/notifications")
+def get_notifications():
+    if "username" not in session:
+        return jsonify({"error": "Please login first"}), 401
 
+    user_id = session["username"]
+    
+    # Cari semua post milik user saat ini
+    user_posts = posts_collection.find({"user_id": user_id})
+    post_ids = [str(post["_id"]) for post in user_posts]
+    
+    # Cari semua likes yang terkait dengan post milik user
+    notifications = []
+    for like in likes_collection.find({"post_id": {"$in": post_ids}}).sort("created_at", DESCENDING):
+        post = posts_collection.find_one({"_id": ObjectId(like["post_id"])})
+        liker = users_collection.find_one({"username": like["user_id"]})  # Cari data pengguna yang memberikan like
+        
+        if post and liker:
+            notifications.append({
+                "username": like["user_id"],
+                "post_title": post["title"],
+                "created_at": like["created_at"].strftime("%H:%M"),  # Hanya jam dan menit
+                "profile_pic": liker.get("profile_pic", "static/images/default.jpg")  # Default jika tidak ada foto
+            })
+    
+    return jsonify(notifications)
 
 # Route Logout
 @app.route("/logout")
