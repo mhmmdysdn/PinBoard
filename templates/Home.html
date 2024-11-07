@@ -31,11 +31,10 @@
     </script>
 
     <style>
-               #searchResults {
+                #searchResults {
         max-height: 400px; /* Tentukan tinggi maksimal agar bisa di-scroll */
         overflow-y: auto; /* Aktifkan scroll vertikal */
     }
-
 
         .result-item {
             background-color: #fff;
@@ -98,6 +97,7 @@
             height: 100%;
             background: rgba(0, 0, 0, 0.5);
             z-index: 1000;
+            padding: 70px 0;
         }
         .search-modal.active {
             display: flex;
@@ -126,47 +126,26 @@
         .modal.active {
             display: flex;
         }
-        #searchResults {
-        max-height: 400px;
-        overflow-y: auto;
-    }
+        .postDetailModal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1001;
+            justify-content: center;
+            align-items: center;
+        }
+        .postDetailModal.active {
+            display: flex;
+        }
+        .post-detail-bg {
+            max-height: 90vh; /* Set maksimal tinggi modal */
+            overflow-y: auto; /* Aktifkan scroll jika konten lebih panjang */
+        }
 
-    /* Modal Style */
-    .modal {
-        display: none;
-        position: fixed;
-        z-index: 1000;
-        left: 0;
-        top: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0, 0, 0, 0.5);
-        justify-content: center;
-        align-items: center;
-    }
-    
-    .modal-content {
-        background-color: white;
-        padding: 20px;
-        border-radius: 8px;
-        width: 80%;
-        max-width: 600px;
-        text-align: center;
-    }
-
-    .close {
-        position: absolute;
-        top: 15px;
-        right: 15px;
-        font-size: 24px;
-        cursor: pointer;
-    }
-
-    .modal-image {
-        max-width: 100%;
-        height: auto;
-        margin-bottom: 15px;
-    }
         /* Bubble style */
 .category-bubble {
     padding: 10px 20px;
@@ -198,6 +177,67 @@
     grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); /* Responsive grid */
     gap: 10px;
 }
+
+.modal-content {
+    background-color: #fefefe;
+    border-radius: 10px;
+    padding: 20px;
+    max-width: 600px;
+    margin: 15% auto;
+    position: relative;
+    text-align: left;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  }
+
+  .close {
+    color: #333;
+    font-size: 24px;
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    cursor: pointer;
+  }
+
+  /* Gaya untuk daftar notifikasi */
+  #notificationList {
+    max-height: 400px;
+    overflow-y: auto;
+    padding: 10px;
+    border-top: 1px solid #e0e0e0;
+  }
+
+  .notification-item {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    margin: 8px 0;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s;
+  }
+
+  .notification-item:hover {
+    background-color: #f1f1f1;
+  }
+
+  .notification-icon {
+    font-size: 24px;
+    color: #ff6363;
+    margin-right: 15px;
+  }
+
+  .notification-text {
+    font-size: 14px;
+    line-height: 1.4;
+    color: #333;
+  }
+
+  .notification-time {
+    font-size: 12px;
+    color: #888;
+    margin-top: 4px;
+  }
     </style>
 </head>
 <body class="bg-gray-100">
@@ -233,23 +273,10 @@
             
             <!-- Hasil pencarian akan ditampilkan di sini -->
             <div id="searchResults" class="grid grid-cols-2 gap-4 mt-4">
-                <!-- Search results will be populated here -->
-            </div>
-            
-            <!-- Modal for Image Details -->
-            <div id="imageModal" class="modal">
-                <div class="modal-content">
-                    <span class="close" onclick="closeModal()">&times;</span>
-                    <img id="modalImage" class="modal-image" src="" alt="">
-                    <h3 id="modalTitle"></h3>
-                    <p id="modalDescription"></p>
-                </div>
-            </div>                <!-- Hasil pencarian akan dimasukkan melalui JavaScript -->
+                <!-- Hasil pencarian akan dimasukkan melalui JavaScript -->
             </div>
         </div>
     </div>
-
-
 
     <!-- Navigation Bar -->
     <nav class="bg-white shadow-md fixed w-full z-10">
@@ -266,41 +293,69 @@
                     <a href="{{ url_for('create_post') }}" class="p-2 hover:bg-gray-100 rounded-full">
                         <i class="fas fa-plus text-xl"></i>
                     </a>
-                    <button class="p-2 hover:bg-gray-100 rounded-full">
+                    <button class="p-2 hover:bg-gray-100 rounded-full" onclick="openNotifications()">
                         <i class="fas fa-bell text-xl"></i>
                     </button>
+                    <!-- Modal Notifikasi -->
+                    <div id="notificationModal" class="modal">
+                        <div class="modal-content">
+                          <span class="close" onclick="closeNotifications()">&times;</span>
+                          <h2 class="text-lg font-bold text-center mb-4">Riwayat Notifikasi</h2>
+                          <div id="notificationList">
+                            <p>Memuat riwayat notifikasi...</p>
+                          </div>
+                        </div>
+                      </div>
                     <div class="relative">
                         <a href="{{ url_for('profile') }}">
                             <button class="flex items-center space-x-2 p-2 hover:bg-gray-100 rounded-full">
-                                <img src="{{ url_for('static', filename='images/default.jpg') }}" class="w-8 h-8 rounded-full" alt="Profile">
-                                <span class="font-medium">{{ username }}</span> 
+                                <img src="{{ profile_image_url }}" class="w-8 h-8 rounded-full" alt="Profile">
+                                <span class="font-medium">{{ username }}</span>
                             </button>
                         </a>
                     </div>
-                    <a href="{{ url_for('logout') }}" class="p-2 hover:bg-gray-100 rounded-full">
-                        <i class="fas fa-sign-out-alt text-xl"></i>
-                    </a>
+                    <button onclick="openSettings()" class="p-2 hover:bg-gray-100 rounded-full">
+                        <i class="fas fa-cog text-xl"></i>
+                    </button>
                 </div>
             </div>
         </div>
     </nav>
 
+    <!-- Settings Modal -->
+<div id="settingsModal" class="modal hidden">
+    <div class="bg-white rounded-lg p-4 max-w-md w-full m-auto absolute right-0 mt-16 shadow-lg">
+        <h3 class="text-lg font-medium mb-4 text-center">Settings</h3>
+        <button onclick="logout()" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mb-2 w-full text-center">
+            Logout
+        </button>
+        <button onclick="closeSettings()" class="text-gray-500 hover:text-gray-700 mt-4 w-full text-center">
+            <i class="fas fa-times"></i> Close
+        </button>
+    </div>
+</div>
+
+
+
     <!-- Main Content -->
     <main class="pt-20">
         <div class="pin-container">
             {% for post in posts %}
-            <div class="pin-item shadow-lg" data-post-id="{{ post._id }}">
+            <div class="pin-item shadow-lg" data-post-id="{{ post._id }}" onclick="showPostDetail({
+                image_url: '{{ post.image_url }}',
+                title: '{{ post.title }}',
+                description: '{{ post.description }}',
+                user_id: '{{ post.user_id }}',
+                likes_count: '{{ post.likes_count }}'
+            })">
                 <div class="relative">
                     <img src="{{ post.image_url }}" class="w-full" alt="{{ post.title }}">
                     <div class="pin-overlay absolute inset-0 flex flex-col justify-between p-4">
                         <div class="flex justify-end space-x-2">
-                            <button onclick="toggleLike('{{ post._id }}')" 
+                            <button onclick="toggleLike('{{ post._id }}'); event.stopPropagation();" 
                                     class="like-button bg-white p-2 rounded-full hover:bg-gray-100 {{ 'text-red-500' if post.is_liked else '' }}"
                                     title="{{ 'Liked on ' + post.liked_at if post.is_liked else 'Like this post' }}">
                                 <i class="{{ 'fas' if post.is_liked else 'far' }} fa-heart"></i>
-                            </button>
-                            <button class="bg-white p-2 rounded-full hover:bg-gray-100">
-                                <i class="fas fa-bookmark"></i>
                             </button>
                         </div>
                     </div>
@@ -314,8 +369,6 @@
                                       onclick="showLikeDetails('{{ post._id }}')">
                                     {{ post.likes_count }} likes
                                 </span>
-                                
-                                <!-- Tooltip untuk recent likes -->
                                 <div class="hidden group-hover:block absolute bottom-full left-0 mb-2 w-48 bg-white rounded-lg shadow-lg p-2 text-xs">
                                     {% if post.recent_likes %}
                                         <div class="font-medium mb-1">Recent likes:</div>
@@ -338,13 +391,13 @@
                             </div>
                         </div>
                     </div>
-
+        
                     <h3 class="text-lg font-semibold">{{ post.title }}</h3>
                     
                     <div class="mt-2">
                         <p class="text-sm">{{ post.description }}</p>
                     </div>
-
+        
                     {% if post.is_liked %}
                     <div class="mt-2 text-xs text-gray-500">
                         You liked this post
@@ -354,7 +407,24 @@
             </div>
             {% endfor %}
         </div>
-    </main> 
+    </main>
+
+    <!-- Modal untuk Menampilkan Detail Postingan -->
+<div class="postDetailModal" style="display:none;">
+    <div class="post-detail-bg bg-white w-full max-w-2xl mx-auto rounded-lg shadow-lg p-6 relative max-h-[90vh] overflow-auto">
+        <!-- Tombol tutup modal -->
+        <button onclick="closePostDetail()" class="text-gray-500 hover:text-gray-700 absolute top-4 right-4 w-10 h-10 rounded-full flex items-center justify-center bg-gray-200">
+            <i class="fas fa-times"></i>
+        </button>
+        <img id="postDetailImage" src="" alt="Post Image" class="w-full h-auto rounded-lg mb-4">
+        <h3 id="postDetailTitle" class="text-lg font-semibold mb-2"></h3>
+        <p id="postDetailDescription" class="text-sm mb-4"></p>
+        <span class="text-sm">Posted by : <span id="postDetailUsername"></span></span>
+        <div class="flex justify-between mt-4">
+            <span id="postDetailLikes" class="text-sm"></span>
+        </div>
+    </div>
+</div>
 
     <!-- Modal untuk menampilkan semua likes -->
     <div id="likesModal" class="modal">
@@ -375,6 +445,23 @@
     <script>
         let currentCategory = null;  // Menyimpan kategori yang sedang dipilih
 
+        function showPostDetail(post) {
+    // Isi modal dengan data postingan
+    document.getElementById('postDetailImage').src = post.image_url;
+    document.getElementById('postDetailTitle').innerText = post.title;
+    document.getElementById('postDetailDescription').innerText = post.description;
+    document.getElementById('postDetailUsername').innerText = post.user_id; // username
+    document.getElementById('postDetailLikes').innerText = post.likes_count + ' likes';
+
+    // Tampilkan modal
+    document.querySelector('.postDetailModal').style.display = 'flex';
+}
+
+function closePostDetail() {
+    document.querySelector('.postDetailModal').style.display = 'none';
+}
+
+
 function filterByCategory(categoryId, e) {
     console.log("Category ID:", categoryId); // Debugging
 
@@ -384,21 +471,22 @@ function filterByCategory(categoryId, e) {
 }
 
 function searchPins() {
-    const query = document.getElementById('searchInput').value.trim();
-    const category = currentCategory;
-    
+    const query = document.getElementById('searchInput').value.trim(); // Ambil kata kunci pencarian
+    const category = currentCategory; // Ambil kategori yang sedang dipilih
     if (category && query) {
-        currentCategory = "";
+        currentCategory = ""
     }
 
     // Tampilkan loading saat mencari
     document.getElementById('searchResults').innerHTML = 'Loading...';
 
-    let url = '/search?query=' + encodeURIComponent(query);
+    // Buat URL pencarian
+    let url = '/search?query=' + encodeURIComponent(query); 
     if (category) {
-        url += '&category=' + encodeURIComponent(category);
+        url += '&category=' + encodeURIComponent(category);  // Tambahkan kategori jika ada
     }
 
+    // Fetch hasil pencarian berdasarkan query dan kategori
     fetch(url)
         .then(response => {
             if (!response.ok) {
@@ -421,18 +509,94 @@ function searchPins() {
                             <p class="text-sm text-gray-700">${result.description}</p>
                             <span class="text-xs text-gray-500">By @${result.user_id}</span>
                         </div>
-                    </div>`;
+                    </div>
+                `;
             });
             document.getElementById('searchResults').innerHTML = resultsHTML;
         })
         .catch(error => {
             console.error('Error fetching search results:', error);
             document.getElementById('searchResults').innerHTML = 'Error loading results';
-       });
+        });
 }
 
+function openSettings() {
+    document.getElementById('settingsModal').style.display = 'flex';
+}
 
+function closeSettings() {
+    document.getElementById('settingsModal').style.display = 'none';
+}
+
+function logout() {
+    if (confirm("Are you sure you want to log out?")) {
+        // Jika user mengklik OK, lanjutkan logout
+        window.location.href = "{{ url_for('logout') }}";
+      }
+}
+
+function deleteAccount() {
+    if (confirm('Are you sure you want to delete your account?')) {
+        // Buat permintaan untuk menghapus akun
+        fetch('/delete_account', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                // Data yang diperlukan untuk menghapus akun
+            })
+        })
+        .then(response => {
+            if (response.ok) {
+                alert('Account deleted successfully');
+                window.location.href = "{{ url_for('logout') }}";  // Logout setelah hapus akun
+            } else {
+                alert('Error deleting account');
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+}
+
+// Fungsi untuk membuka modal notifikasi
+function openNotifications() {
+        document.getElementById("notificationModal").style.display = "block";
+        fetchNotifications();
+    }
+
+    // Fungsi untuk menutup modal notifikasi
+    function closeNotifications() {
+        document.getElementById("notificationModal").style.display = "none";
+    }
+
+    // Fungsi untuk mengambil data notifikasi melalui AJAX
+    function fetchNotifications() {
+        fetch("/notifications")
+            .then(response => response.json())
+            .then(data => {
+                let notificationList = document.getElementById("notificationList");
+                notificationList.innerHTML = "";  // Kosongkan konten sebelumnya
+                
+                if (data.error) {
+                    notificationList.innerHTML = `<p>${data.error}</p>`;
+                    return;
+                }
+
+                if (data.length === 0) {
+                    notificationList.innerHTML = "<p>Tidak ada notifikasi baru.</p>";
+                } else {
+                    data.forEach(notification => {
+                        let item = document.createElement("p");
+                        item.textContent = `${notification.username} telah menyukai postingan anda "${notification.post_title}" pada ${notification.created_at}`;
+                        notificationList.appendChild(item);
+                    });
+                }
+            })
+            .catch(error => {
+                console.error("Error fetching notifications:", error);
+            });
+    }
         </script>
 </body>
 </html>
-
